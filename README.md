@@ -17,7 +17,8 @@
 - **🤖 AI分析エンジン**: Gemini・Claude AIによる高度な売上分析・改善提案
 - **📊 リアルタイムダッシュボード**: 売上・在庫・パフォーマンスの可視化
 - **💰 利益最適化**: データ駆動による価格戦略・在庫管理
-- **🔄 自動化ワークフロー**: 24時間稼働の監視・アラートシステム
+- **🔄 24時間自動化エンジン**: 24時間稼働の監視・アラートシステム
+- **📈 Chart.js統合**: インタラクティブなグラフとリアルタイム更新
 
 ### 💡 期待効果
 
@@ -48,6 +49,28 @@ cd ec-automation-system
 bash quick_start.sh
 ```
 
+## 🚀 新機能（追加済み）
+
+### 📊 リアルタイムダッシュボード
+```bash
+# リアルタイムダッシュボード起動
+python main.py realtime
+```
+- **Chart.js統合**: インタラクティブな売上推移グラフ
+- **自動データ更新**: 30秒ごとの自動リフレッシュ
+- **レスポンシブデザイン**: モバイル・タブレット対応
+- **美しいUI/UX**: グラデーション・アニメーション効果
+
+### 🤖 24時間自動化エンジン
+```bash
+# 自動化エンジン実行
+python main.py automation
+```
+- **SQLiteデータベース連携**: 売上・在庫・利益データ自動取得
+- **JSON出力**: ダッシュボード用データ自動生成
+- **エラーハンドリング**: 堅牢なエラー処理機能
+- **スケジュール実行対応**: cron/タスクスケジューラ対応
+
 ## 📚 完全ガイドドキュメント
 
 | ファイル | 説明 | 対象者 |
@@ -68,7 +91,7 @@ cd ec-automation-system
 
 # Python仮想環境作成（推奨）
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
 # 依存関係インストール
 pip install -r requirements.txt
@@ -109,32 +132,68 @@ python main.py test
 # AI分析実行  
 python main.py ai
 
-# ダッシュボード起動
+# 標準ダッシュボード起動
 python main.py dashboard
+
+# リアルタイムダッシュボード起動
+python main.py realtime
+
+# 24時間自動化エンジン実行
+python main.py automation
 ```
 
 ## 📊 システム構成
 
 ```
 🚀 ec-automation-system/
-├── 📄 README.md                   # プロジェクト概要
-├── 📋 SETUP_GUIDE.md              # 完全セットアップガイド
-├── 📈 OPERATION_MANUAL.md         # 運用マニュアル
-├── ⚡ quick_start.bat             # Windowsワンクリックセットアップ
-├── 🚀 quick_start.sh              # Linux/Macワンコマンドセットアップ
-├── 📋 requirements.txt             # Python依存関係
-├── 🔒 .gitignore                  # セキュリティファイル除外
-├── ⚙️ .env.example               # 環境変数テンプレート
-├── 📄 LICENSE                     # MITライセンス
-├── 🚀 main.py                     # メイン実行ファイル
-├── ⚡ setup.bat                   # ワンクリックセットアップ
-├── 📁 config/settings.py          # セキュアな設定管理
+├── 📄 README.md                            # プロジェクト概要（更新済み）
+├── 📋 SETUP_GUIDE.md                       # 完全セットアップガイド
+├── 📈 OPERATION_MANUAL.md                  # 運用マニュアル
+├── ⚡ quick_start.bat                      # Windowsワンクリックセットアップ
+├── 🚀 quick_start.sh                       # Linux/Macワンコマンドセットアップ
+├── 📋 requirements.txt                      # Python依存関係
+├── 🔒 .gitignore                           # セキュリティファイル除外
+├── ⚙️ .env.example                        # 環境変数テンプレート
+├── 📄 LICENSE                              # MITライセンス
+├── 🚀 main.py                              # メイン実行ファイル（更新済み）
+├── ⚡ setup.bat                            # ワンクリックセットアップ
+├── 📁 config/settings.py                   # セキュアな設定管理
 ├── 📁 src/
-│   ├── 🤖 ai_integration/         # Gemini・Claude AI統合
-│   ├── 🛒 amazon_connector/       # Amazon SP-API接続
-│   ├── 🟢 rakuten_connector/      # 楽天API接続
-│   └── 📊 dashboard/              # リアルタイムダッシュボード
-└── 📁 tests/integration_test.py   # 統合テストシステム
+│   ├── 🤖 ai_integration/                  # Gemini・Claude AI統合
+│   ├── 🛒 amazon_connector/                # Amazon SP-API接続
+│   ├── 🟢 rakuten_connector/               # 楽天API接続
+│   ├── 📊 dashboard/                       # リアルタイムダッシュボード
+│   │   ├── dashboard.html                  # 標準ダッシュボード
+│   │   ├── dashboard_realtime.html         # リアルタイムダッシュボード（新規）
+│   │   └── dashboard_data.json             # ダッシュボード用データ（自動生成）
+│   └── 🤖 automation_engine_24h.py         # 24時間自動化エンジン（新規）
+└── 📁 tests/integration_test.py             # 統合テストシステム
+```
+
+## 🆕 新しいコマンド一覧
+
+### 基本コマンド
+```bash
+python main.py setup       # 初期セットアップ
+python main.py status      # システム状況確認
+python main.py test        # 統合テスト実行
+python main.py ai          # AI分析実行
+```
+
+### ダッシュボード
+```bash
+python main.py dashboard   # 標準ダッシュボード起動
+python main.py realtime    # リアルタイムダッシュボード起動（新機能）
+```
+
+### 自動化
+```bash
+python main.py automation  # 24時間自動化エンジン実行（新機能）
+```
+
+### デバッグ
+```bash
+python main.py [command] --debug  # デバッグモードで実行
 ```
 
 ## 💰 投資回収効果
@@ -156,14 +215,14 @@ python main.py dashboard
 ### 朝のルーティン（10分）
 ```bash
 python main.py status              # システム状況確認
-python main.py report --yesterday  # 夜間処理結果確認
-python main.py ai --recommendations # AI推奨アクション確認
+python main.py automation          # 夜間処理結果確認
+python main.py ai                  # AI推奨アクション確認
 ```
 
 ### 夕方のルーティン（5分）
 ```bash
-python main.py dashboard --daily-summary  # 当日売上サマリー
-python main.py inventory --alerts         # 在庫アラート確認
+python main.py realtime             # リアルタイムダッシュボード確認
+python main.py automation          # 当日データ更新
 ```
 
 詳細な運用方法は [📈 OPERATION_MANUAL.md](OPERATION_MANUAL.md) をご覧ください。
@@ -174,6 +233,7 @@ python main.py inventory --alerts         # 在庫アラート確認
 1. **API接続エラー**: `.env`ファイルのAPIキー確認
 2. **依存関係エラー**: `pip install -r requirements.txt`再実行
 3. **権限エラー**: Amazon・楽天の開発者アカウント権限確認
+4. **ダッシュボード表示エラー**: `python main.py setup`再実行
 
 ### 🆘 サポート
 - **技術サポート**: [SETUP_GUIDE.md](SETUP_GUIDE.md) 参照
@@ -200,6 +260,7 @@ MIT License - 詳細は [LICENSE](LICENSE) をご覧ください。
 ![成功指標](https://img.shields.io/badge/%E6%9C%88%E6%AC%A1%E5%88%A9%E7%9B%8A-¥1,327,500+-success)
 ![効率化](https://img.shields.io/badge/%E4%BD%9C%E6%A5%AD%E6%99%82%E9%96%93%E5%89%8A%E6%B8%9B-70--80%25-brightgreen)
 ![ROI](https://img.shields.io/badge/年間ROI-200--300%25-red)
+![新機能](https://img.shields.io/badge/%E6%96%B0%E6%A9%9F%E8%83%BD-%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%BF%E3%82%A4%E3%83%A0%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89-orange)
 
 **あなたのECビジネスを次のレベルへ！**
 
