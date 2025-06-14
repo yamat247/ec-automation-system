@@ -40,7 +40,7 @@ def setup_environment():
             print(f"❌ .envファイル作成エラー: {e}")
     
     # 必要なディレクトリ作成
-    directories = ["data", "logs", "results", "tests/results"]
+    directories = ["data", "logs", "results", "tests/results", "src/dashboard"]
     for dir_path in directories:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
     
@@ -59,6 +59,17 @@ def show_status():
         print(f"Claude API: {'✅ 設定済み' if config.claude_api_key else '❌ 未設定'}")
         print(f"Amazon API: {'✅ 設定済み' if config.amazon_client_id else '❌ 未設定'}")
         print(f"楽天API: {'✅ 設定済み' if config.rakuten_service_secret else '❌ 未設定'}")
+        
+        # ダッシュボードファイル確認
+        dashboard_files = [
+            "src/dashboard/dashboard.html",
+            "src/dashboard/dashboard_realtime.html"
+        ]
+        print(f"\nダッシュボード:")
+        for file in dashboard_files:
+            exists = Path(file).exists()
+            print(f"  {file}: {'✅ 利用可能' if exists else '❌ 未作成'}")
+            
     except Exception as e:
         print(f"❌ 設定読み込みエラー: {e}")
         print("💡 まず 'python main.py setup' を実行してください")
@@ -88,20 +99,38 @@ async def run_ai_analysis():
         print(f"❌ AI分析エラー: {e}")
         return None
 
-def run_dashboard():
+def generate_dashboard_data():
+    """ダッシュボード用データ生成"""
+    try:
+        from src.automation_engine_24h import fetch_dashboard_data
+        print("📊 ダッシュボードデータを生成中...")
+        data = fetch_dashboard_data()
+        print("✅ ダッシュボードデータ生成完了")
+        return data
+    except Exception as e:
+        print(f"⚠️ ダッシュボードデータ生成エラー: {e}")
+        print("💡 デモデータでダッシュボードを表示します")
+        return None
+
+def run_dashboard(realtime=False):
     """ダッシュボード起動"""
     import webbrowser
     import http.server
     import socketserver
     import threading
     
-    # ダッシュボードファイルパス
-    dashboard_path = Path("src/dashboard/dashboard.html")
+    # ダッシュボードファイル選択
+    dashboard_file = "dashboard_realtime.html" if realtime else "dashboard.html"
+    dashboard_path = Path(f"src/dashboard/{dashboard_file}")
     
     if not dashboard_path.exists():
-        print("❌ ダッシュボードファイルが見つかりません")
+        print(f"❌ ダッシュボードファイルが見つかりません: {dashboard_path}")
         print("💡 システムが完全にセットアップされていない可能性があります")
         return
+    
+    # ダッシュボードデータ生成（リアルタイム版の場合のみ）
+    if realtime:
+        generate_dashboard_data()
     
     # 簡易HTTPサーバー起動
     PORT = 8080
@@ -112,10 +141,11 @@ def run_dashboard():
     
     try:
         with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
-            print(f"🌐 ダッシュボードサーバー起動中: http://localhost:{PORT}")
+            dashboard_type = "リアルタイム" if realtime else "標準"
+            print(f"🌐 {dashboard_type}ダッシュボードサーバー起動中: http://localhost:{PORT}")
             
             # ブラウザでダッシュボードを開く
-            dashboard_url = f"http://localhost:{PORT}/src/dashboard/dashboard.html"
+            dashboard_url = f"http://localhost:{PORT}/src/dashboard/{dashboard_file}"
             
             def open_browser():
                 import time
@@ -138,6 +168,26 @@ def run_dashboard():
     except Exception as e:
         print(f"❌ サーバー起動エラー: {e}")
 
+def run_automation_engine():
+    """24時間自動化エンジン実行"""
+    try:
+        print("🤖 24時間自動化エンジンを開始します...")
+        
+        # データ生成
+        data = generate_dashboard_data()
+        
+        if data:
+            print("✅ 自動化エンジン実行完了")
+            print(f"📊 売上データ: 今日¥{data['sales']['today']:,} / 週間¥{data['sales']['week_total']:,}")
+            print(f"📦 在庫状況: {data['inventory']['total_items']}商品中 {data['inventory']['low_stock']}商品が要補充")
+            print(f"💰 利益率: {data['profit']['profit_rate']:.1%}")
+        
+        return data
+        
+    except Exception as e:
+        print(f"❌ 自動化エンジンエラー: {e}")
+        return None
+
 async def main():
     """メイン関数"""
     parser = argparse.ArgumentParser(
@@ -146,7 +196,7 @@ async def main():
     
     parser.add_argument(
         "command",
-        choices=["test", "ai", "dashboard", "setup", "status"],
+        choices=["test", "ai", "dashboard", "setup", "status", "automation", "realtime"],
         help="実行するコマンド"
     )
     
@@ -187,8 +237,22 @@ async def main():
                 print("\n❌ AI分析でエラーが発生しました。")
                 
         elif args.command == "dashboard":
-            print("📊 ダッシュボードを起動します...")
-            run_dashboard()
+            print("📊 標準ダッシュボードを起動します...")
+            run_dashboard(realtime=False)
+            
+        elif args.command == "realtime":
+            print("📊 リアルタイムダッシュボードを起動します...")
+            run_dashboard(realtime=True)
+            
+        elif args.command == "automation":
+            print("🤖 24時間自動化エンジンを実行します...")
+            data = run_automation_engine()
+            
+            if data:
+                print("\n🎉 自動化エンジン実行完了！")
+                print("💡 'python main.py realtime' でリアルタイムダッシュボードを確認できます")
+            else:
+                print("\n❌ 自動化エンジンでエラーが発生しました。")
             
     except KeyboardInterrupt:
         print("\n🛑 実行を中断しました")
@@ -198,6 +262,39 @@ async def main():
             import traceback
             traceback.print_exc()
 
+def show_help():
+    """使用方法表示"""
+    help_text = """
+🚀 EC自動化システム - 使用方法
+
+基本コマンド:
+  python main.py setup      # 初期セットアップ
+  python main.py status     # システム状況確認
+  python main.py test       # 統合テスト実行
+  python main.py ai         # AI分析実行
+  
+ダッシュボード:
+  python main.py dashboard  # 標準ダッシュボード起動
+  python main.py realtime   # リアルタイムダッシュボード起動
+  
+自動化:
+  python main.py automation # 24時間自動化エンジン実行
+
+オプション:
+  --debug                   # デバッグモードで実行
+
+例:
+  python main.py setup                    # 初回セットアップ
+  python main.py status                   # 現在の状況確認
+  python main.py realtime                 # リアルタイムダッシュボード
+  python main.py automation --debug       # デバッグモードで自動化実行
+    """
+    print(help_text)
+
 if __name__ == "__main__":
-    # 非同期実行
-    asyncio.run(main())
+    # 引数なしの場合はヘルプ表示
+    if len(sys.argv) == 1:
+        show_help()
+    else:
+        # 非同期実行
+        asyncio.run(main())
