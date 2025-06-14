@@ -67,6 +67,15 @@ def show_status():
         print(f"Notion API: {'✅ 設定済み' if notion_token else '❌ 未設定'}")
         print(f"NotionDB ID: {'✅ 設定済み' if notion_db_id else '❌ 未設定'}")
         
+        # EC統合システム確認
+        try:
+            from src.ec_notion_integration import ECAutomationNotionManager
+            manager = ECAutomationNotionManager()
+            integration_report = manager.create_integration_report()
+            print(f"\n🔗 システム統合スコア: {integration_report['integration_score']}%")
+        except Exception:
+            print(f"\n🔗 システム統合: 基本モード")
+        
         # ダッシュボードファイル確認
         dashboard_files = [
             "src/dashboard/dashboard.html",
@@ -107,32 +116,48 @@ async def run_ai_analysis():
         return None
 
 async def run_notion_sync():
-    """Notion同期実行"""
+    """EC統合Notion同期実行"""
     try:
-        from src.notion_enhanced_integration import NotionECIntegration
-        notion = NotionECIntegration()
+        # 新しい統合システムを優先使用
+        from src.ec_notion_integration import ECAutomationNotionManager
+        manager = ECAutomationNotionManager()
         
         # 設定検証
-        if not notion.validate_notion_config():
+        if not manager.validate_notion_config():
             print("❌ Notion設定が不完全です")
             print("💡 docs/NOTION_SETUP_GUIDE.md を参照してセットアップしてください")
             return False
         
-        # 日次レポート同期
-        print("📊 Notion日次レポートを同期中...")
-        success = await notion.sync_daily_report()
+        # 包括的データ同期
+        print("📊 EC自動化システム統合データをNotionに同期中...")
+        success = await manager.sync_to_notion_database()
         
         if success:
-            print("🎉 Notion同期完了！")
-            print("💡 Notionワークスペースで確認してください")
+            print("\n🎉 EC統合Notion同期完了！")
+            print("💡 Notionワークスペースでデータを確認してください")
+            print("📊 全システムのデータが統合されました")
         else:
-            print("❌ Notion同期に失敗しました")
+            print("\n❌ Notion同期に失敗しました")
         
         return success
         
     except Exception as e:
-        print(f"❌ Notion同期エラー: {e}")
-        return False
+        print(f"❌ EC統合Notion同期エラー: {e}")
+        # フォールバック: 従来のシステム使用
+        try:
+            from src.notion_enhanced_integration import NotionECIntegration
+            notion = NotionECIntegration()
+            
+            if not notion.validate_notion_config():
+                return False
+            
+            print("📊 基本Notion同期を実行中...")
+            success = await notion.sync_daily_report()
+            return success
+            
+        except Exception as fallback_e:
+            print(f"❌ フォールバック同期エラー: {fallback_e}")
+            return False
 
 def generate_dashboard_data():
     """ダッシュボード用データ生成"""
@@ -272,12 +297,13 @@ async def main():
                 print("\n❌ AI分析でエラーが発生しました。")
                 
         elif args.command == "notion":
-            print("📊 Notion同期を実行します...")
+            print("📊 EC統合Notion同期を実行します...")
             success = await run_notion_sync()
             
             if success:
-                print("\n🎉 Notion同期が完了しました！")
+                print("\n🎉 EC統合Notion同期が完了しました！")
                 print("💡 Notionワークスペースでデータを確認してください")
+                print("📈 Amazon・楽天・AI分析データが全て統合されています")
             else:
                 print("\n❌ Notion同期でエラーが発生しました。")
                 
@@ -296,7 +322,7 @@ async def main():
             if data:
                 print("\n🎉 自動化エンジン実行完了！")
                 print("💡 'python main.py realtime' でリアルタイムダッシュボードを確認できます")
-                print("💡 'python main.py notion' でNotionに同期できます")
+                print("💡 'python main.py notion' でNotionに統合データを同期できます")
             else:
                 print("\n❌ 自動化エンジンでエラーが発生しました。")
             
@@ -325,7 +351,7 @@ def show_help():
   
 自動化・連携:
   python main.py automation # 24時間自動化エンジン実行
-  python main.py notion     # Notion日次レポート同期
+  python main.py notion     # EC統合Notion同期（新機能）
 
 オプション:
   --debug                   # デバッグモードで実行
@@ -334,8 +360,13 @@ def show_help():
   python main.py setup                    # 初回セットアップ
   python main.py status                   # 現在の状況確認
   python main.py realtime                 # リアルタイムダッシュボード
-  python main.py notion                   # Notion同期実行
+  python main.py notion                   # EC統合Notion同期実行
   python main.py automation --debug       # デバッグモードで自動化実行
+
+🆕 新機能: EC統合Notion同期
+  - Amazon・楽天・AI分析データを全て統合
+  - システム統合スコア表示
+  - 包括的データドリブン経営支援
     """
     print(help_text)
 
