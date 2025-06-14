@@ -40,7 +40,7 @@ def setup_environment():
             print(f"❌ .envファイル作成エラー: {e}")
     
     # 必要なディレクトリ作成
-    directories = ["data", "logs", "results", "tests/results", "src/dashboard"]
+    directories = ["data", "logs", "results", "tests/results", "src/dashboard", "docs"]
     for dir_path in directories:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
     
@@ -59,6 +59,13 @@ def show_status():
         print(f"Claude API: {'✅ 設定済み' if config.claude_api_key else '❌ 未設定'}")
         print(f"Amazon API: {'✅ 設定済み' if config.amazon_client_id else '❌ 未設定'}")
         print(f"楽天API: {'✅ 設定済み' if config.rakuten_service_secret else '❌ 未設定'}")
+        
+        # Notion設定確認
+        import os
+        notion_token = os.getenv('NOTION_TOKEN')
+        notion_db_id = os.getenv('NOTION_DATABASE_ID')
+        print(f"Notion API: {'✅ 設定済み' if notion_token else '❌ 未設定'}")
+        print(f"NotionDB ID: {'✅ 設定済み' if notion_db_id else '❌ 未設定'}")
         
         # ダッシュボードファイル確認
         dashboard_files = [
@@ -98,6 +105,34 @@ async def run_ai_analysis():
     except Exception as e:
         print(f"❌ AI分析エラー: {e}")
         return None
+
+async def run_notion_sync():
+    """Notion同期実行"""
+    try:
+        from src.notion_enhanced_integration import NotionECIntegration
+        notion = NotionECIntegration()
+        
+        # 設定検証
+        if not notion.validate_notion_config():
+            print("❌ Notion設定が不完全です")
+            print("💡 docs/NOTION_SETUP_GUIDE.md を参照してセットアップしてください")
+            return False
+        
+        # 日次レポート同期
+        print("📊 Notion日次レポートを同期中...")
+        success = await notion.sync_daily_report()
+        
+        if success:
+            print("🎉 Notion同期完了！")
+            print("💡 Notionワークスペースで確認してください")
+        else:
+            print("❌ Notion同期に失敗しました")
+        
+        return success
+        
+    except Exception as e:
+        print(f"❌ Notion同期エラー: {e}")
+        return False
 
 def generate_dashboard_data():
     """ダッシュボード用データ生成"""
@@ -196,7 +231,7 @@ async def main():
     
     parser.add_argument(
         "command",
-        choices=["test", "ai", "dashboard", "setup", "status", "automation", "realtime"],
+        choices=["test", "ai", "dashboard", "setup", "status", "automation", "realtime", "notion"],
         help="実行するコマンド"
     )
     
@@ -236,6 +271,16 @@ async def main():
             else:
                 print("\n❌ AI分析でエラーが発生しました。")
                 
+        elif args.command == "notion":
+            print("📊 Notion同期を実行します...")
+            success = await run_notion_sync()
+            
+            if success:
+                print("\n🎉 Notion同期が完了しました！")
+                print("💡 Notionワークスペースでデータを確認してください")
+            else:
+                print("\n❌ Notion同期でエラーが発生しました。")
+                
         elif args.command == "dashboard":
             print("📊 標準ダッシュボードを起動します...")
             run_dashboard(realtime=False)
@@ -251,6 +296,7 @@ async def main():
             if data:
                 print("\n🎉 自動化エンジン実行完了！")
                 print("💡 'python main.py realtime' でリアルタイムダッシュボードを確認できます")
+                print("💡 'python main.py notion' でNotionに同期できます")
             else:
                 print("\n❌ 自動化エンジンでエラーが発生しました。")
             
@@ -277,8 +323,9 @@ def show_help():
   python main.py dashboard  # 標準ダッシュボード起動
   python main.py realtime   # リアルタイムダッシュボード起動
   
-自動化:
+自動化・連携:
   python main.py automation # 24時間自動化エンジン実行
+  python main.py notion     # Notion日次レポート同期
 
 オプション:
   --debug                   # デバッグモードで実行
@@ -287,6 +334,7 @@ def show_help():
   python main.py setup                    # 初回セットアップ
   python main.py status                   # 現在の状況確認
   python main.py realtime                 # リアルタイムダッシュボード
+  python main.py notion                   # Notion同期実行
   python main.py automation --debug       # デバッグモードで自動化実行
     """
     print(help_text)
