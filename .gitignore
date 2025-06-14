@@ -1,0 +1,66 @@
+# セキュリティ重要ファイル - Git管理対象外
+.env
+*.env
+env/
+venv/
+
+# API認証情報
+*api_key*
+*secret*
+*token*
+config/secrets.json
+
+# データベース・ログファイル
+*.db
+*.sqlite
+*.sqlite3
+logs/
+*.log
+
+# システム固有ファイル
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE設定ファイル
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS固有ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 一時ファイル
+temp/
+tmp/
+*.tmp
+*.bak
+*.backup
+
+# 実データ・テスト結果
+results/
+output/
+reports/
+data/real_*
+test_results/
