@@ -39,6 +39,10 @@ class ECAutomationConfig:
         # システム設定
         self.log_level = os.getenv('LOG_LEVEL', 'INFO')
         self.database_path = os.getenv('DATABASE_PATH', './data/ec_automation.db')
+
+        # Notion設定
+        self.notion_token = os.getenv('NOTION_TOKEN')
+        self.notion_database_id = os.getenv('NOTION_DATABASE_ID')
         
         # バリデーション実行
         self.validate_config()
@@ -114,7 +118,8 @@ EC自動化システム設定:
 ├── Gemini API: {'✅ 設定済み' if self.gemini_api_key else '❌ 未設定'}
 ├── Claude API: {'✅ 設定済み' if self.claude_api_key else '❌ 未設定'}
 ├── Amazon API: {'✅ 設定済み' if self.amazon_client_id else '❌ 未設定'}
-└── 楽天API: {'✅ 設定済み' if self.rakuten_service_secret else '❌ 未設定'}
+├── 楽天API: {'✅ 設定済み' if self.rakuten_service_secret else '❌ 未設定'}
+└── Notion連携: {'✅ 設定済み' if self.notion_database_id else '❌ 未設定'}
         """.strip()
 
 # グローバル設定インスタンス
