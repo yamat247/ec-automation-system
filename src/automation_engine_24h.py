@@ -7,6 +7,8 @@ import json
 from datetime import date, timedelta, datetime
 from pathlib import Path
 import sys
+import os
+from notion_client import Client
 
 # プロジェクトルートをパスに追加
 project_root = Path(__file__).parent.parent
@@ -106,6 +108,30 @@ def fetch_dashboard_data():
         json.dump(data, f, ensure_ascii=False, indent=2)
 
     print(f"✅ Dashboard data updated: {output_path}")
+
+    # Notion同期
+    NOTION_TOKEN = "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"
+    NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
+
+    if NOTION_DATABASE_ID:
+        try:
+            notion = Client(auth=NOTION_TOKEN)
+            notion.pages.create(
+                parent={"database_id": NOTION_DATABASE_ID},
+                properties={
+                    "日付": {"date": {"start": datetime.now().date().isoformat()}},
+                    "売上": {"number": data["sales"]["today"]},
+                    "在庫率": {"number": data["inventory"]["stock_ratio"]},
+                    "利益": {"number": data["profit"]["today_profit"]},
+                    "利益率": {"number": data["profit"]["profit_rate"]},
+                },
+            )
+            print("✅ Notionへ投稿しました")
+        except Exception as e:
+            print(f"❌ Notion投稿エラー: {e}")
+    else:
+        print("ℹ️ NOTION_DATABASE_ID が設定されていないため Notion への投稿をスキップします")
+
     return data
 
 

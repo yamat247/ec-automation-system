@@ -95,6 +95,8 @@ source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
 # 依存関係インストール
 pip install -r requirements.txt
+# Notion連携を使う場合は追加でインストール
+pip install notion-client
 
 # 初期セットアップ
 python main.py setup
@@ -118,6 +120,9 @@ AMAZON_SELLER_ID=your_amazon_seller_id_here
 # 楽天API設定
 RAKUTEN_SERVICE_SECRET=your_rakuten_service_secret_here
 RAKUTEN_LICENSE_KEY=your_rakuten_license_key_here
+
+# Notion設定
+NOTION_DATABASE_ID=your_notion_database_id_here  # データベースIDを指定
 ```
 
 ### 3. システム起動・確認
